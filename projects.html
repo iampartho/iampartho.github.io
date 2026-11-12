@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projects · Partho Ghosh</title>
+  <meta name="description" content="Ongoing research by Partho Ghosh: lung segmentation that transfers from CT to UTE MRI, anatomy-preserving MRI-to-CT synthesis, a lung foundation model, and airway segmentation in fibrotic lungs.">
+  <link rel="canonical" href="https://iampartho.github.io/projects.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Projects · Partho Ghosh">
+  <meta property="og:description" content="Making pulmonary image analysis work where labeled data is scarce: CT, UTE MRI, synthesis and foundation models.">
+  <meta property="og:url" content="https://iampartho.github.io/projects.html">
+  <meta property="og:image" content="https://iampartho.github.io/assets/img/profile.jpg">
+  <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e1014" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script>(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="mark" aria-hidden="true">PG</span>Partho Ghosh</a>
+    <nav class="nav-links" id="site-menu" aria-label="Main">
+      <a href="index.html">About</a>
+      <a href="publications.html">Publications</a>
+      <a href="projects.html" aria-current="page">Projects</a>
+      <a href="experience.html">Experience</a>
+      <a href="achievements.html">Achievements</a>
+      <a href="hobbies.html">Hobbies</a>
+      <a href="cv.html">CV</a>
+    </nav>
+    <button class="icon-btn theme-btn" type="button" aria-label="Switch theme">
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+    <button class="icon-btn menu-btn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main" class="wrap">
+
+  <section class="page-head">
+    <p class="eyebrow">Research &middot; ongoing work</p>
+    <h1>Projects</h1>
+    <p class="lede">Thousands of annotated CT scans exist, but labeled UTE MRI scans are rare. My Ph.D. builds three bridges across that gap, plus a parallel thread on airway segmentation in diseased lungs. These projects are still in progress, so this page covers the <em>what</em> and the <em>why</em>. The <em>how</em> will follow in the papers.</p>
+  </section>
+
+  <div class="bridge" role="group" aria-label="Thesis overview: three routes from CT to UTE MRI">
+    <div class="end rich">
+      <span class="tag">Data-rich</span>
+      <b>CT</b>
+      <span>Thousands of annotated scans and mature analysis tools, but it uses ionizing radiation.</span>
+    </div>
+    <div class="routes">
+      <a class="route" href="#cross-modal"><span class="num">01</span><span class="lbl">Generalize the model<small>segment MRI with what CT taught</small></span></a>
+      <a class="route" href="#synthesis"><span class="num">02</span><span class="lbl">Translate the image<small>MRI &rarr; CT-like, anatomy intact</small></span></a>
+      <a class="route" href="#foundation"><span class="num">03</span><span class="lbl">Learn the lung once<small>a lung foundation model</small></span></a>
+    </div>
+    <div class="end scarce">
+      <span class="tag">Data-scarce</span>
+      <b>UTE MRI</b>
+      <span>Radiation-free and repeatable, ideal for children and follow-ups, but labels are scarce.</span>
+    </div>
+  </div>
+  <p class="side-thread"><span>Parallel thread:</span> <a href="#airway">04 &middot; Airway segmentation in fibrotic lungs</a></p>
+
+  <!-- ============================ Project 01 ============================ -->
+  <section class="project" id="cross-modal">
+    <div class="project-text">
+      <p class="eyebrow">Project 01 &middot; Aim 1 &middot; Ongoing</p>
+      <h2>Train on CT, segment MRI</h2>
+      <p class="q">Can a lung segmentation model that learned from CT work on an MRI it has never seen?</p>
+      <p>Ultrashort-echo-time (UTE) MRI images the lungs without ionizing radiation, which makes it ideal for children and for repeated scans. But labeled UTE MRI data is scarce, and a model trained on CT usually breaks down on MRI because the two modalities look completely different.</p>
+      <p>In our <a href="publications.html#pub-isbi2025">ISBI 2025 paper</a>, training jointly on CT and a small set of labeled MRI already improved UTE MRI segmentation. I&rsquo;m now going after the harder setting: reaching strong MRI accuracy with a model trained <strong>only on CT</strong>, by teaching it to rely on lung <em>shape</em> rather than scanner-specific brightness, and by handling the shift to MRI without any MRI labels.</p>
+      <div class="why"><b>Why it matters</b>Radiation-free lung imaging only becomes quantitative when segmentation is reliable. Removing the need for MRI labels makes that possible on any scanner, at any site.</div>
+      <ul class="tags"><li>UTE MRI</li><li>CT</li><li>Domain generalization</li><li>3D segmentation</li></ul>
+      <p class="outputs">So far: <a href="publications.html#pub-isbi2025">ISBI 2025 paper</a> &middot; <a href="publications.html">ROH 2026 poster</a></p>
+    </div>
+    <figure class="viz" data-viz="randomize">
+      <div class="viz-stage">
+        <canvas role="img" aria-label="A synthetic chest slice whose intensities and textures keep changing while the gold lung outline stays fixed"></canvas>
+        <span class="viz-label l" data-role="label">Randomized #2</span>
+      </div>
+      <div class="viz-bar" role="toolbar" aria-label="Appearance">
+        <button class="viz-btn" type="button" data-mode="ct" aria-pressed="false">CT</button>
+        <button class="viz-btn" type="button" data-mode="mri" aria-pressed="false">UTE MRI</button>
+        <button class="viz-btn" type="button" data-mode="random" aria-pressed="true">Randomized</button>
+        <span class="spacer"></span>
+        <button class="viz-btn" type="button" data-action="shuffle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Shuffle</button>
+        <button class="viz-btn" type="button" data-toggle="mask" aria-pressed="true">Lung mask</button>
+      </div>
+      <figcaption class="viz-cap"><b>Same anatomy, endless appearances.</b> Intensities and textures get scrambled, but the lungs (gold) never move. Variation like this pushes a network to look for shape instead of brightness. Procedurally generated phantom, not patient data.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================ Project 02 ============================ -->
+  <section class="project flip" id="synthesis">
+    <div class="project-text">
+      <p class="eyebrow">Project 02 &middot; Aim 2 &middot; Ongoing</p>
+      <h2>MRI &rarr; CT synthesis that respects anatomy</h2>
+      <p class="q">Turn a radiation-free MRI into a CT-like image without moving a single lung boundary.</p>
+      <p>Decades of mature analysis tools exist for lung CT. If a UTE MRI could be translated into a realistic CT-like image, all of those tools could run on MRI directly. Paired MRI and CT scans of the same patient are rare, so I work with <strong>unpaired</strong> image translation (CycleGAN-style models).</p>
+      <p>The catch is that these models are great at making images <em>look</em> realistic, but they can quietly change the anatomy, shrinking or inflating the lungs. My work focuses on constraining the translation so the anatomy is preserved by design, not by luck.</p>
+      <div class="why"><b>Why it matters</b>A synthetic CT you can trust anatomically lets proven CT pipelines for segmentation and quantitative biomarkers extend to radiation-free MRI.</div>
+      <ul class="tags"><li>Unpaired translation</li><li>GANs</li><li>Anatomy preservation</li><li>UTE MRI &rarr; CT</li></ul>
+    </div>
+    <figure class="viz" data-viz="compare">
+      <div class="viz-stage">
+        <canvas class="grab" role="img" aria-label="A slider comparing a simulated UTE MRI slice on the left with a CT-like version on the right; the lung outline is identical on both sides"></canvas>
+        <span class="viz-label l">UTE MRI</span>
+        <span class="viz-label r">Synthetic CT</span>
+        <span class="viz-hint">drag to compare</span>
+      </div>
+      <div class="viz-range">
+        <label for="cmp-split">Split</label>
+        <input id="cmp-split" type="range" min="2" max="98" value="50">
+        <button class="viz-btn" type="button" data-toggle="mask" aria-pressed="false">Lung outline</button>
+      </div>
+      <figcaption class="viz-cap"><b>Change the style, keep the anatomy.</b> Turn on the lung outline: it is identical on both sides of the slider, and an anatomy-preserving translation has to guarantee exactly that. Procedurally generated phantom, not patient data or model output.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================ Project 03 ============================ -->
+  <section class="project" id="foundation">
+    <div class="project-text">
+      <p class="eyebrow">Project 03 &middot; Aim 3 &middot; Ongoing since Nov 2024</p>
+      <h2>A foundation model for the lung</h2>
+      <p class="q">Learn the lung once from unlabeled scans, then reuse that knowledge wherever labels are scarce.</p>
+      <p>General-purpose medical models exist, but surprisingly few are built specifically for the lung, even though it is a self-contained organ with many clinical tasks. I&rsquo;m investigating <strong>self-supervised pretraining</strong> strategies that let a model learn lung anatomy from large collections of unlabeled scans.</p>
+      <p>The second half of the question is adaptation: how to fine-tune such a model for new modalities and tasks, such as UTE MRI, from only a handful of labeled examples <em>without forgetting</em> what it learned during pretraining.</p>
+      <div class="why"><b>Why it matters</b>One strong pretrained lung model could make every downstream task work in the low-data regime, from lung and airway segmentation to disease characterization.</div>
+      <ul class="tags"><li>Self-supervised learning</li><li>Foundation models</li><li>Representation learning</li><li>Low-data adaptation</li></ul>
+    </div>
+    <figure class="viz" data-viz="masked">
+      <div class="viz-stage">
+        <canvas role="img" aria-label="A synthetic chest slice with most square patches hidden, which are then filled back in one by one"></canvas>
+        <span class="viz-label l" data-role="modality">CT</span>
+        <span class="viz-label r" data-role="state">75% of patches hidden</span>
+      </div>
+      <div class="viz-range">
+        <label for="mask-ratio">Hidden</label>
+        <input id="mask-ratio" type="range" min="0" max="90" step="5" value="75">
+        <output for="mask-ratio">75%</output>
+        <button class="viz-btn" type="button" data-toggle="play" aria-pressed="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg><span>Pause</span></button>
+      </div>
+      <figcaption class="viz-cap"><b>Learning without labels.</b> Hide most of a scan and learn to fill it back in. Repeated over many scans and scanners, this kind of pretext task teaches a model what lungs look like before it ever sees a label. Procedurally generated phantom, not patient data.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================ Project 04 ============================ -->
+  <section class="project flip" id="airway">
+    <div class="project-text">
+      <p class="eyebrow">Project 04 &middot; Ongoing since Feb 2024</p>
+      <h2>Airways in fibrotic lungs</h2>
+      <p class="q">Segmenting the airway tree where disease makes it hardest to see.</p>
+      <p>Airway segmentation underpins the assessment of COPD, fibrosis and lung cancer, and guides navigation bronchoscopy, yet tracing an airway tree by hand can take around 15 hours per scan. In fibrotic lung disease it gets harder still: <strong>honeycomb cysts</strong> look strikingly like airway lumens on CT, so networks &ldquo;leak&rdquo; into them, and even expert labels miss fine branches.</p>
+      <p>I&rsquo;m building full-resolution 3D segmentation that holds up in these lungs, trained on carefully curated scans from multiple public challenge datasets.</p>
+      <div class="why"><b>Why it matters</b>Reliable airway trees in diseased lungs are a prerequisite for measuring airway remodeling and for planning interventions.</div>
+      <ul class="tags"><li>Airway segmentation</li><li>Fibrotic lung disease</li><li>3D U-Net</li><li>Full-resolution CT</li></ul>
+      <p class="outputs">So far: <a href="publications.html">ROH 2024 poster</a></p>
+    </div>
+    <figure class="viz" data-viz="airway">
+      <div class="viz-stage">
+        <canvas class="square grab" tabindex="0" role="img" aria-label="A rotating synthetic 3D airway tree inside faint lung outlines; optional honeycomb cysts and false leakage can be shown"></canvas>
+        <span class="viz-hint">drag to rotate</span>
+      </div>
+      <div class="viz-bar" role="toolbar" aria-label="Scenario">
+        <button class="viz-btn" type="button" data-mode="healthy" aria-pressed="true">Airway tree</button>
+        <button class="viz-btn" type="button" data-mode="honeycomb" aria-pressed="false">+ Honeycombing</button>
+        <button class="viz-btn" type="button" data-mode="leak" aria-pressed="false">Naive model</button>
+      </div>
+      <div class="viz-legend"><span><i style="background:#ffcd00"></i>airway tree</span><span><i style="background:#78cddc"></i>honeycomb cysts</span><span><i style="background:#ff6252"></i>false &ldquo;airway&rdquo; (leakage)</span></div>
+      <figcaption class="viz-cap"><b>Why fibrotic lungs are hard.</b> Cysts clustered under the pleura mimic airway lumens, so a naive model grows false branches into them. Synthetic 3D tree, not patient data.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================ Past projects ============================ -->
+  <section class="section reveal" id="past">
+    <div class="section-head"><h2>Earlier projects</h2></div>
+    <p class="section-intro">From my time at BUET, the mHealth Lab and industry, before pulmonary imaging.</p>
+    <div class="past-grid">
+      <article class="past">
+        <span class="meta">2023 &ndash; 2024 &middot; mHealth Lab, BUET</span>
+        <h3>Domain generalization for office activity recognition</h3>
+        <p>Plug-and-play pre-processing that keeps video activity classifiers accurate in office environments they were never trained on.</p>
+        <div class="actions"><a class="chip-btn" href="publications.html#pub-dghar2025">Paper</a><a class="chip-btn" href="https://arxiv.org/abs/2503.12678" target="_blank" rel="noopener">arXiv</a></div>
+      </article>
+      <article class="past">
+        <span class="meta">2021 &ndash; 2022 &middot; Alzheimer&rsquo;s research</span>
+        <h3>Clogged blood vessel detection</h3>
+        <p>Sequence-agnostic, multimodal (image + point cloud) pre-processing for spotting stalled brain capillaries in two-photon microscopy videos.</p>
+        <div class="actions"><a class="chip-btn" href="publications.html#pub-icasspw2023">ICASSPW 2023</a><a class="chip-btn" href="https://github.com/iampartho/Alzheimers-Stall-Catchers" target="_blank" rel="noopener">Competition code</a></div>
+      </article>
+      <article class="past">
+        <span class="meta">2019 &ndash; 2020 &middot; IEEE VIP Cup 2019</span>
+        <h3>Privacy-aware activity recognition</h3>
+        <p>Detect-and-blur protection for screens, faces and documents in body-camera office videos, combined with 18-class activity recognition. 3rd place at the IEEE VIP Cup 2019.</p>
+        <div class="actions"><a class="chip-btn" href="publications.html#pub-ic4ir2023">IC4IR+ 2023</a><a class="chip-btn" href="https://arxiv.org/abs/2006.06246" target="_blank" rel="noopener">arXiv</a></div>
+      </article>
+      <article class="past">
+        <span class="meta">2020 &middot; mHealth Lab, BUET</span>
+        <h3>SegCodeNet</h3>
+        <p>A second video stream of color-coded segmentation masks, with stream- and frame-wise attention, for egocentric activity detection.</p>
+        <div class="actions"><a class="chip-btn" href="publications.html#pub-segcodenet2020">Paper</a><a class="chip-btn" href="https://github.com/iampartho/SegCodeNet" target="_blank" rel="noopener">Code</a></div>
+      </article>
+      <article class="past">
+        <span class="meta">2020 &middot; IEEE VIP Cup 2020 &middot; Champion</span>
+        <h3>Fisheye vehicle detection &amp; tracking</h3>
+        <p>Real-time detection and tracking of vehicles at road junctions from a fisheye camera. This was the winning entry of team BUET Synapticans.</p>
+        <div class="actions"><a class="chip-btn" href="achievements.html">Achievements</a></div>
+      </article>
+      <article class="past">
+        <span class="meta">2023 &middot; Drug discovery</span>
+        <h3>ResDTA: drug&ndash;target binding affinity</h3>
+        <p>Residual CNNs over raw SMILES strings and protein sequences predict how strongly a drug binds its target, with no hand-crafted chemistry features.</p>
+        <div class="actions"><a class="chip-btn" href="publications.html#pub-resdta2023">Paper</a><a class="chip-btn" href="https://arxiv.org/abs/2303.11434" target="_blank" rel="noopener">arXiv</a></div>
+      </article>
+      <article class="past">
+        <span class="meta">2023 &middot; adorsho praniSheba Ltd.</span>
+        <h3>Computer vision for livestock</h3>
+        <p>Industry work as a machine-learning engineer: improving cattle identification and heat-detection systems, and estimating body weight from ordinary mobile-phone images.</p>
+      </article>
+      <article class="past">
+        <span class="meta">2018 &middot; BUET</span>
+        <h3>Food recognition &amp; nutrition estimation</h3>
+        <p>A CNN that recognizes dishes from a photo and estimates their calorie content.</p>
+        <div class="actions"><a class="chip-btn" href="https://github.com/iampartho/Food-Recognition-and-Food-Value-Determination-with-Convolutional-Neural-Networks" target="_blank" rel="noopener">Code</a></div>
+      </article>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <span>&copy; <span data-year>2026</span> Partho Ghosh &middot; Last updated November 2026</span>
+    <nav aria-label="Elsewhere">
+      <a href="mailto:partho-ghosh@uiowa.edu">Email</a>
+      <a href="https://scholar.google.com/citations?user=H5ahLtkAAAAJ&amp;hl=en" target="_blank" rel="noopener">Google Scholar</a>
+      <a href="https://www.linkedin.com/in/iampartho/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/iampartho" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="assets/js/site.js"></script>
+<script src="assets/js/viz.js"></script>
+</body>
+</html>
