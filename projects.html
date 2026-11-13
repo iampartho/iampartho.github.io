@@ -61,7 +61,7 @@
     </div>
     <div class="routes">
       <a class="route" href="#cross-modal"><span class="num">01</span><span class="lbl">Generalize the model<small>segment MRI with what CT taught</small></span></a>
-      <a class="route" href="#synthesis"><span class="num">02</span><span class="lbl">Translate the image<small>MRI &rarr; CT-like, anatomy intact</small></span></a>
+      <a class="route" href="#synthesis"><span class="num">02</span><span class="lbl">Translate the image<small>MRI &rarr; CT-like, anatomy intact, then use CT tools</small></span></a>
       <a class="route" href="#foundation"><span class="num">03</span><span class="lbl">Learn the lung once<small>a lung foundation model</small></span></a>
     </div>
     <div class="end scarce">
@@ -75,12 +75,12 @@
   <!-- ============================ Project 01 ============================ -->
   <section class="project" id="cross-modal">
     <div class="project-text">
-      <p class="eyebrow">Project 01 &middot; Aim 1 &middot; Ongoing</p>
+      <p class="eyebrow">Project 01 &middot; Ongoing</p>
       <h2>Train on CT, segment MRI</h2>
       <p class="q">Can a lung segmentation model that learned from CT work on an MRI it has never seen?</p>
       <p>Ultrashort-echo-time (UTE) MRI images the lungs without ionizing radiation, which makes it ideal for children and for repeated scans. But labeled UTE MRI data is scarce, and a model trained on CT usually breaks down on MRI because the two modalities look completely different.</p>
       <p>In our <a href="publications.html#pub-isbi2025">ISBI 2025 paper</a>, training jointly on CT and a small set of labeled MRI already improved UTE MRI segmentation. I&rsquo;m now going after the harder setting: reaching strong MRI accuracy with a model trained <strong>only on CT</strong>, by teaching it to rely on lung <em>shape</em> rather than scanner-specific brightness, and by handling the shift to MRI without any MRI labels.</p>
-      <div class="why"><b>Why it matters</b>Radiation-free lung imaging only becomes quantitative when segmentation is reliable. Removing the need for MRI labels makes that possible on any scanner, at any site.</div>
+      <div class="why"><b>Why it matters</b>Radiation-free lung imaging only becomes quantitative when segmentation tools becomes reliable on those scans. Removing the need for labeled data makes that possible on any scanner, at any site at a large scale.</div>
       <ul class="tags"><li>UTE MRI</li><li>CT</li><li>Domain generalization</li><li>3D segmentation</li></ul>
       <p class="outputs">So far: <a href="publications.html#pub-isbi2025">ISBI 2025 paper</a> &middot; <a href="publications.html">ROH 2026 poster</a></p>
     </div>
@@ -105,13 +105,13 @@
   <!-- ============================ Project 02 ============================ -->
   <section class="project flip" id="synthesis">
     <div class="project-text">
-      <p class="eyebrow">Project 02 &middot; Aim 2 &middot; Ongoing</p>
+      <p class="eyebrow">Project 02 &middot; Ongoing</p>
       <h2>MRI &rarr; CT synthesis that respects anatomy</h2>
       <p class="q">Turn a radiation-free MRI into a CT-like image without moving a single lung boundary.</p>
-      <p>Decades of mature analysis tools exist for lung CT. If a UTE MRI could be translated into a realistic CT-like image, all of those tools could run on MRI directly. Paired MRI and CT scans of the same patient are rare, so I work with <strong>unpaired</strong> image translation (CycleGAN-style models).</p>
-      <p>The catch is that these models are great at making images <em>look</em> realistic, but they can quietly change the anatomy, shrinking or inflating the lungs. My work focuses on constraining the translation so the anatomy is preserved by design, not by luck.</p>
+      <p>Decades of mature analysis tools exist for lung CT. If a UTE MRI could be translated into a realistic CT-like image, all of those tools could run on MRI directly. Paired MRI and CT scans of the same patient are rare, so I work with <strong>unpaired</strong> image translation.</p>
+      <p>The catch is that the baseline models are great at making images <em>look</em> realistic, but they quietly change the anatomy, shrinking or inflating the lungs. My work focuses on constraining the translation so the anatomy is preserved by design, not by luck.</p>
       <div class="why"><b>Why it matters</b>A synthetic CT you can trust anatomically lets proven CT pipelines for segmentation and quantitative biomarkers extend to radiation-free MRI.</div>
-      <ul class="tags"><li>Unpaired translation</li><li>GANs</li><li>Anatomy preservation</li><li>UTE MRI &rarr; CT</li></ul>
+      <ul class="tags"><li>Unpaired translation</li><li>GANs</li><li>Domain Adaptation</li><li>Anatomy preservation</li><li>UTE MRI &rarr; CT</li></ul>
     </div>
     <figure class="viz" data-viz="compare">
       <div class="viz-stage">
@@ -132,11 +132,11 @@
   <!-- ============================ Project 03 ============================ -->
   <section class="project" id="foundation">
     <div class="project-text">
-      <p class="eyebrow">Project 03 &middot; Aim 3 &middot; Ongoing since Nov 2024</p>
+      <p class="eyebrow">Project 03 &middot; Ongoing </p>
       <h2>A foundation model for the lung</h2>
-      <p class="q">Learn the lung once from unlabeled scans, then reuse that knowledge wherever labels are scarce.</p>
-      <p>General-purpose medical models exist, but surprisingly few are built specifically for the lung, even though it is a self-contained organ with many clinical tasks. I&rsquo;m investigating <strong>self-supervised pretraining</strong> strategies that let a model learn lung anatomy from large collections of unlabeled scans.</p>
-      <p>The second half of the question is adaptation: how to fine-tune such a model for new modalities and tasks, such as UTE MRI, from only a handful of labeled examples <em>without forgetting</em> what it learned during pretraining.</p>
+      <p class="q">Learn the lung once from thousands of lung scans, then reuse that knowledge wherever labels are scarce.</p>
+      <p> General-purpose medical models exist, but surprisingly few are built specifically for the lung, even though it is a self-contained organ with many clinical tasks. I&rsquo;m investigating <strong>self-supervised pretraining</strong> strategies that let a model learn lung anatomy from large collections of lung scans. Basically developing an underlying understanding of the lungs.</p>
+      <p>The second half of the question is adaptation: how to fine-tune such a model for new modalities and tasks, where labelled data is scarce <em>without forgetting</em> what it learned during pretraining.</p>
       <div class="why"><b>Why it matters</b>One strong pretrained lung model could make every downstream task work in the low-data regime, from lung and airway segmentation to disease characterization.</div>
       <ul class="tags"><li>Self-supervised learning</li><li>Foundation models</li><li>Representation learning</li><li>Low-data adaptation</li></ul>
     </div>
@@ -160,13 +160,13 @@
   <!-- ============================ Project 04 ============================ -->
   <section class="project flip" id="airway">
     <div class="project-text">
-      <p class="eyebrow">Project 04 &middot; Ongoing since Feb 2024</p>
+      <p class="eyebrow">Project 04 &middot; Ongoing </p>
       <h2>Airways in fibrotic lungs</h2>
       <p class="q">Segmenting the airway tree where disease makes it hardest to see.</p>
-      <p>Airway segmentation underpins the assessment of COPD, fibrosis and lung cancer, and guides navigation bronchoscopy, yet tracing an airway tree by hand can take around 15 hours per scan. In fibrotic lung disease it gets harder still: <strong>honeycomb cysts</strong> look strikingly like airway lumens on CT, so networks &ldquo;leak&rdquo; into them, and even expert labels miss fine branches.</p>
-      <p>I&rsquo;m building full-resolution 3D segmentation that holds up in these lungs, trained on carefully curated scans from multiple public challenge datasets.</p>
+      <p>Airway segmentation underpins the assessment of COPD, fibrosis and lung cancer, and guides navigation bronchoscopy, yet tracing an airway tree by hand can take around 15 hours per scan. In fibrotic lung disease it gets harder, and even expert labels miss fine branches..</p>
+      <p>I&rsquo;m building full-resolution 3D segmentation that holds up in these lungs by forcing models distinguish between airway and air sacks.</p>
       <div class="why"><b>Why it matters</b>Reliable airway trees in diseased lungs are a prerequisite for measuring airway remodeling and for planning interventions.</div>
-      <ul class="tags"><li>Airway segmentation</li><li>Fibrotic lung disease</li><li>3D U-Net</li><li>Full-resolution CT</li></ul>
+      <ul class="tags"><li>Airway segmentation</li><li>Fibrotic lung disease</li><li>Full-resolution CT</li></ul>
       <p class="outputs">So far: <a href="publications.html">ROH 2024 poster</a></p>
     </div>
     <figure class="viz" data-viz="airway">
