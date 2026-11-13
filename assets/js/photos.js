@@ -11,7 +11,12 @@
    ===================================================================== */
 
 var PHOTOS = [
-  // { src: 'assets/img/hobbies/example.jpg', caption: 'Where / what', category: 'travel' },
+  { src: 'assets/img/hobbies/glacier.jpg',          caption: 'Glacier National Park, MT',          category: 'travel' },
+  { src: 'assets/img/hobbies/violin.jpg',           caption: 'Playing the violin',                 category: 'music' },
+  { src: 'assets/img/hobbies/great_sand_dunes.jpg', caption: 'Great Sand Dunes National Park, CO', category: 'travel' },
+  { src: 'assets/img/hobbies/northern_lights.jpg',  caption: 'Catching the northern lights',       category: 'travel' },
+  { src: 'assets/img/hobbies/rocky.jpg',            caption: 'Rocky Mountain National Park, CO',   category: 'travel' },
+  { src: 'assets/img/hobbies/kalimba.jpg',          caption: 'Playing the kalimba',                category: 'music' },
 ];
 
 /* ===================================================================== *
