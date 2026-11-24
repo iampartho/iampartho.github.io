@@ -1,12 +1,14 @@
 /* =====================================================================
    viz.js: interactive illustrations (Projects page + home page art)
 
-   Everything drawn here is PROCEDURAL: a synthetic chest "phantom" and
-   a synthetic airway tree generated from random numbers in the browser.
-   No patient data and no outputs of real models are shown.
+   Everything drawn here is PROCEDURAL: a synthetic chest "phantom", a
+   synthetic airway tree and a cartoon feature space, all generated from
+   random numbers in the browser. No patient data and no outputs of real
+   models are shown.
 
    A widget is any element with  data-viz="randomize" | "compare" |
-   "airway" | "masked" | "hero-tree"; see projects.html for the markup.
+   "airway" | "masked" | "familiar" | "hero-tree"; see projects.html for
+   the markup.
    ===================================================================== */
 (function () {
   'use strict';
@@ -709,6 +711,196 @@
   }
 
   /* ---------------------------------------------------------------- *
+   *  Widget: "familiar" (which incoming scans are new to a model?)     *
+   *  A cartoon of a model's feature space: gold dots are training      *
+   *  scans, and their kernel density marks out a "familiar zone" (a    *
+   *  level set traced with marching squares). Each incoming scan is    *
+   *  judged familiar or new against it; adding the new ones grows the  *
+   *  zone. Random points only: no real model features.                 *
+   * ---------------------------------------------------------------- */
+  function initFamiliar(root) {
+    var cv = root.querySelector('canvas'), ctx = cv.getContext('2d');
+    var labState = root.querySelector('[data-role="state"]'), labCount = root.querySelector('[data-role="count"]');
+    var modeBtns = root.querySelectorAll('[data-mode]');
+    var addBtn = root.querySelector('[data-action="add"]'), resetBtn = root.querySelector('[data-action="reset"]');
+    var XR = 4 / 3, GW = 80, GH = 60, H2 = 2 * 0.12 * 0.12, LEVEL = 0.9, NB = 24, N_TRAIN = 44;   // LEVEL < 1: every training scan sits in the zone
+    var STAGGER = 40, ARRIVE = 380, JUDGE = 260, ADD = 900, PAUSE = 450, HOLD = 3600;
+    var C_GOLD = [255, 205, 0], C_NEW = [120, 205, 220], C_FAM = [150, 158, 172], C_IN = [236, 236, 236];
+    var r = rng(52), seedSet = [], train = [], batch = [], mode = 'same', joinFrom = 0;
+    var D = null, Dfrom = null, Dto = null, segs = [];
+    var phase = 'idle', t = 0, pulse = 0, hold = 0, demo = !RM, demoStep = 0;
+    var zone = document.createElement('canvas'); zone.width = GW; zone.height = GH;
+    var zctx = zone.getContext('2d'), zimg = zctx.createImageData(GW, GH);
+
+    function pt(x, y) { return { x: clamp(x, -1.25, 1.25), y: clamp(y, -0.8, 0.9) }; }   // keep clear of the top labels
+    function heavy() { return r() < 0.2 ? 2.1 : 1; }                 // occasional outliers on the fringe
+    function fromSame() {                                             // the "home" scanner: a lopsided cloud
+      var k = r(), c = k < 0.45 ? [-0.55, 0.05, 0.22, 0.17] : k < 0.8 ? [-0.25, 0.22, 0.17, 0.14] : [-0.7, -0.22, 0.13, 0.12];
+      var s = heavy();
+      return pt(c[0] + gauss(r) * c[2] * s, c[1] + gauss(r) * c[3] * s);
+    }
+    function fromNew() {                                              // a different scanner: features land elsewhere
+      var s = heavy();
+      return pt(0.62 + gauss(r) * 0.17 * s, -0.18 + gauss(r) * 0.14 * s);
+    }
+    function density(x, y) {
+      var s = 0;
+      for (var k = 0; k < train.length; k++) { var dx = x - train[k].x, dy = y - train[k].y; s += Math.exp(-(dx * dx + dy * dy) / H2); }
+      return s;
+    }
+    function densityGrid() {
+      var G = new Float32Array(GW * GH);
+      for (var j = 0; j < GH; j++) for (var i = 0; i < GW; i++) G[j * GW + i] = density((i / (GW - 1) * 2 - 1) * XR, j / (GH - 1) * 2 - 1);
+      return G;
+    }
+    function blend(A, B, u) { var G = new Float32Array(A.length); for (var k = 0; k < A.length; k++) G[k] = A[k] + (B[k] - A[k]) * u; return G; }
+    function smoothstep(e0, e1, x) { var u = clamp((x - e0) / (e1 - e0), 0, 1); return u * u * (3 - 2 * u); }
+    function buildZone(G) {                                           // soft gold fill + outline at LEVEL
+      var px = zimg.data, i, j, k;
+      for (k = 0; k < GW * GH; k++) {
+        px[k * 4] = 255; px[k * 4 + 1] = 205; px[k * 4 + 2] = 0;
+        px[k * 4 + 3] = Math.round(smoothstep(LEVEL * 0.6, LEVEL * 2.4, G[k]) * 48);
+      }
+      zctx.putImageData(zimg, 0, 0);
+      segs = [];
+      for (j = 0; j < GH - 1; j++) for (i = 0; i < GW - 1; i++) {     // marching squares, grid units
+        var a = G[j * GW + i], b = G[j * GW + i + 1], c = G[(j + 1) * GW + i + 1], d = G[(j + 1) * GW + i];
+        var id = (a > LEVEL ? 8 : 0) | (b > LEVEL ? 4 : 0) | (c > LEVEL ? 2 : 0) | (d > LEVEL ? 1 : 0);
+        if (id === 0 || id === 15) continue;
+        var T = [i + (LEVEL - a) / (b - a), j], Rt = [i + 1, j + (LEVEL - b) / (c - b)];
+        var B = [i + (LEVEL - d) / (c - d), j + 1], L = [i, j + (LEVEL - a) / (d - a)];
+        if (id === 1 || id === 14) segs.push(L, B);
+        else if (id === 2 || id === 13) segs.push(B, Rt);
+        else if (id === 3 || id === 12) segs.push(L, Rt);
+        else if (id === 4 || id === 11) segs.push(T, Rt);
+        else if (id === 6 || id === 9) segs.push(T, B);
+        else if (id === 7 || id === 8) segs.push(L, T);
+        else if (id === 5) segs.push(T, Rt, L, B);                    // saddles: two separate pieces
+        else segs.push(L, T, B, Rt);
+      }
+    }
+    function countNew() { var n = 0; batch.forEach(function (q) { if (q.isNew) n++; }); return n; }
+    function say(text) {
+      if (labState && text) labState.textContent = text;
+      if (labCount) labCount.textContent = 'training set: ' + train.length;
+    }
+    function setMode(m) {
+      mode = m;
+      Array.prototype.forEach.call(modeBtns, function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-mode') === m ? 'true' : 'false'); });
+    }
+    function newBatch() {
+      batch = [];
+      for (var k = 0; k < NB; k++) {
+        var q = mode === 'same' ? fromSame() : fromNew();
+        q.isNew = density(q.x, q.y) < LEVEL; q.t0 = k * STAGGER;
+        batch.push(q);
+      }
+      phase = RM ? 'shown' : 'arrive'; t = 0; hold = 0;
+      say(RM ? countNew() + ' of ' + NB + ' look new' : 'checking ' + NB + ' scans…');
+    }
+    function resetTrain() { train = seedSet.slice(); joinFrom = train.length; D = densityGrid(); buildZone(D); }
+    function addNew() {
+      var fresh = batch.filter(function (q) { return q.isNew; });
+      joinFrom = train.length;
+      fresh.forEach(function (q) { train.push({ x: q.x, y: q.y }); });
+      Dfrom = D; Dto = fresh.length ? densityGrid() : D;
+      if (RM) { D = Dto; buildZone(D); joinFrom = train.length; newBatch(); return; }
+      phase = 'adding'; t = 0;
+      say(fresh.length ? 'added ' + fresh.length + ' new scan' + (fresh.length > 1 ? 's' : '') : 'nothing new to add');
+    }
+    function demoNext() {                                             // the self-running tour, until someone clicks
+      hold = 0;
+      if (demoStep === 0) { setMode('new'); newBatch(); demoStep = 1; }
+      else if (demoStep === 1) { addNew(); demoStep = 2; }
+      else { resetTrain(); setMode('same'); newBatch(); demoStep = 0; }
+    }
+
+    function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + clamp(a, 0, 1).toFixed(3) + ')'; }
+    function mix(a, b, u) { return [Math.round(a[0] + (b[0] - a[0]) * u), Math.round(a[1] + (b[1] - a[1]) * u), Math.round(a[2] + (b[2] - a[2]) * u)]; }
+    function circle(x, y, rad) { ctx.beginPath(); ctx.arc(x, y, rad, 0, TAU); }
+    function draw() {
+      sizeCanvas(cv);
+      var W = cv.width, H = cv.height, d = dprOf(), k, q, x, y;
+      var sx = function (v) { return (v / XR + 1) / 2 * W; }, sy = function (v) { return (v + 1) / 2 * H; };
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      var g = ctx.createRadialGradient(W * 0.45, H * 0.45, 0, W * 0.5, H * 0.5, Math.max(W, H) * 0.75);
+      g.addColorStop(0, '#141a24'); g.addColorStop(1, '#06070a');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      var step = 24 * d;                                              // faint dot grid: "feature space"
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+      for (y = step / 2; y < H; y += step) for (x = step / 2; x < W; x += step) ctx.fillRect(x - 0.5 * d, y - 0.5 * d, d, d);
+      var cw = W / (GW - 1), ch = H / (GH - 1);                       // grid point (i, j) sits at (i * cw, j * ch)
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(zone, 0, 0, GW, GH, -cw / 2, -ch / 2, W + cw, H + ch);
+      ctx.beginPath();
+      for (k = 0; k < segs.length; k += 2) { ctx.moveTo(segs[k][0] * cw, segs[k][1] * ch); ctx.lineTo(segs[k + 1][0] * cw, segs[k + 1][1] * ch); }
+      ctx.lineWidth = 1.6 * d; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(255, 205, 0, 0.75)'; ctx.stroke();
+      for (k = 0; k < (phase === 'adding' ? joinFrom : train.length); k++) {
+        q = train[k]; circle(sx(q.x), sy(q.y), 3.2 * d);
+        ctx.fillStyle = '#ffcd00'; ctx.fill(); ctx.lineWidth = d; ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)'; ctx.stroke();
+      }
+      var e = phase === 'adding' ? ease(clamp(t / ADD, 0, 1)) : 0;
+      for (k = 0; k < batch.length; k++) {
+        q = batch[k]; x = sx(q.x); y = sy(q.y);
+        var rad = 5.2 * d, alpha = 1, judged = 1, col = q.isNew ? C_NEW : C_FAM;
+        if (phase === 'arrive') {
+          var u = clamp((t - q.t0) / ARRIVE, 0, 1);
+          if (u <= 0) continue;
+          judged = clamp((t - q.t0 - ARRIVE) / JUDGE, 0, 1);
+          col = mix(C_IN, col, judged); alpha = ease(u); rad *= 1 + (1 - ease(u)) * 1.4;
+        } else if (phase === 'adding') {
+          if (q.isNew) {                                              // joins the training set: ring -> gold dot
+            col = mix(C_NEW, C_GOLD, e); rad = (5.2 - 2 * e) * d;
+            circle(x, y, rad); ctx.fillStyle = rgba(C_GOLD, e); ctx.fill();
+          } else alpha = 1 - e;                                       // familiar scans are left out
+        }
+        if (q.isNew && phase !== 'adding') {
+          if (phase === 'shown' && !RM) {                             // soft pulse on scans that look new
+            var f = (pulse % 1600) / 1600;
+            circle(x, y, rad + f * 9 * d); ctx.lineWidth = 1.2 * d; ctx.strokeStyle = rgba(C_NEW, 0.45 * (1 - f)); ctx.stroke();
+          }
+          circle(x, y, rad); ctx.fillStyle = rgba(C_NEW, 0.18 * alpha * judged); ctx.fill();
+        }
+        circle(x, y, rad); ctx.lineWidth = (q.isNew ? 2 : 1.5) * d;
+        ctx.strokeStyle = rgba(col, (q.isNew ? 1 : 0.85) * alpha); ctx.stroke();
+      }
+    }
+    var loop = Loop(function (dt) {
+      t += dt; pulse += dt;
+      if (phase === 'arrive' && t > (NB - 1) * STAGGER + ARRIVE + JUDGE) { phase = 'shown'; t = 0; say(countNew() + ' of ' + NB + ' look new'); }
+      else if (phase === 'adding') {
+        D = t >= ADD ? Dto : blend(Dfrom, Dto, ease(t / ADD)); buildZone(D);
+        if (t >= ADD) { joinFrom = train.length; batch = []; phase = 'pause'; t = 0; }
+      }
+      else if (phase === 'pause' && t > PAUSE) newBatch();
+      else if (phase === 'shown' && demo && (hold += dt) > HOLD) demoNext();
+      draw();
+    });
+
+    function interacted() {                                           // stop the tour; finish any add in progress
+      demo = false;
+      if (phase === 'adding') { D = Dto; buildZone(D); joinFrom = train.length; batch = []; phase = 'pause'; t = 0; }
+    }
+    Array.prototype.forEach.call(modeBtns, function (b) {
+      b.addEventListener('click', function () { interacted(); setMode(b.getAttribute('data-mode')); newBatch(); draw(); });
+    });
+    if (addBtn) addBtn.addEventListener('click', function () {
+      interacted();
+      if (phase === 'arrive') { phase = 'shown'; say(countNew() + ' of ' + NB + ' look new'); }
+      if (phase === 'shown') addNew();
+      draw();
+    });
+    if (resetBtn) resetBtn.addEventListener('click', function () { interacted(); resetTrain(); newBatch(); draw(); });
+
+    for (var k = 0; k < N_TRAIN; k++) seedSet.push(fromSame());
+    resetTrain();
+    newBatch();
+    onResize(cv, draw);
+    draw();
+    whenVisible(root, function () { if (!RM) loop.start(); }, loop.stop);
+  }
+
+  /* ---------------------------------------------------------------- *
    *  Home page: an airway tree that grows behind the portrait          *
    * ---------------------------------------------------------------- */
   function initHeroTree(cv) {
@@ -751,7 +943,7 @@
    *  Boot                                                              *
    * ---------------------------------------------------------------- */
   function boot() {
-    var map = { randomize: initRandomize, compare: initCompare, airway: initAirway, masked: initMasked };
+    var map = { randomize: initRandomize, compare: initCompare, airway: initAirway, masked: initMasked, familiar: initFamiliar };
     Array.prototype.forEach.call(document.querySelectorAll('[data-viz]'), function (el) {
       var kind = el.getAttribute('data-viz');
       try {
