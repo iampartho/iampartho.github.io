@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Projects · Partho Ghosh</title>
-  <meta name="description" content="Ongoing research by Partho Ghosh: lung segmentation that transfers from CT to UTE MRI, anatomy-preserving MRI-to-CT synthesis, a lung foundation model, airway segmentation in fibrotic lungs, and a Out-of-distribution detector on which training data a model actually needs.">
+  <meta name="description" content="Ongoing research by Partho Ghosh: lung segmentation that transfers from CT to UTE MRI, anatomy-preserving MRI-to-CT synthesis, a lung foundation model, an out-of-distribution detector that shows which training data a model actually needs, and airway segmentation in fibrotic lungs.">
   <link rel="canonical" href="https://iampartho.github.io/projects.html">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Projects · Partho Ghosh">
@@ -50,7 +50,7 @@
   <section class="page-head">
     <p class="eyebrow">Research &middot; ongoing work</p>
     <h1>Projects</h1>
-    <p class="lede">Thousands of annotated CT scans exist, but labeled UTE MRI scans are rare. My Ph.D. builds three bridges across that gap, plus two parallel threads: airway segmentation in diseased lungs, and a out-of-distribution detector on which training data a model actually needs. These projects are still in progress, so this page covers the <em>what</em> and the <em>why</em>. The <em>how</em> will follow in the papers.</p>
+    <p class="lede">Thousands of annotated CT scans exist, but labeled UTE MRI scans are rare. My Ph.D. builds three bridges across that gap, plus two parallel threads: an out-of-distribution detector that shows which training data a model actually needs, and airway segmentation in diseased lungs. These projects are still in progress, so this page covers the <em>what</em> and the <em>why</em>. The <em>how</em> will follow in the papers.</p>
   </section>
 
   <div class="bridge" role="group" aria-label="Thesis overview: three routes from CT to UTE MRI">
@@ -70,7 +70,7 @@
       <span>Radiation-free and repeatable, ideal for children and follow-ups, but labels are scarce.</span>
     </div>
   </div>
-  <p class="side-thread"><span>Parallel threads:</span> <a href="#airway">04 &middot; Airway segmentation in fibrotic lungs</a> <a href="#side-quest">05 &middot; OOD Detector: which data does a model need?</a></p>
+  <p class="side-thread"><span>Parallel threads:</span> <a href="#ood-detector">04 &middot; OOD Detector: which data does a model need?</a> <a href="#airway">05 &middot; Airway segmentation in fibrotic lungs</a></p>
 
   <!-- ============================ Project 01 ============================ -->
   <section class="project" id="cross-modal">
@@ -158,9 +158,41 @@
   </section>
 
   <!-- ============================ Project 04 ============================ -->
-  <section class="project flip" id="airway">
+  <section class="project flip" id="ood-detector">
     <div class="project-text">
-      <p class="eyebrow">Project 04 &middot; Ongoing </p>
+      <p class="eyebrow">Project 04 &middot; Out-of-distribution (OOD) Detector &middot; Ongoing</p>
+      <h2>Which data does a model actually need?</h2>
+      <p class="q">Before adding another scan to the pile, ask the model whether that scan is new to it.</p>
+      <p>This one began as a side quest, the small experiments I run purely to build intuition, and grew into a question I now care a lot about. Deep learning is famously data-hungry, and the usual fix for a weak model is more data. I&rsquo;m asking which data actually matters: can a trained network tell us, from its own internal signals, whether an input is familiar to it or genuinely new?</p>
+      <p>The same signals let me check something accuracy alone cannot: when a model scores well on a new kind of scan, does it really see that scan the way it sees its training data? Next, I&rsquo;m turning this into a way to choose data, growing the training set of my <a href="#foundation">lung foundation model</a> with the scans the model finds new rather than more of the same.</p>
+      <div class="why"><b>Why it matters</b>Choosing data by what a model still has to learn, instead of by sheer volume, could make training far more sample-efficient and cut the cost of collecting and labeling medical scans. The same signals can also warn when a deployed model meets data it does not really understand.</div>
+      <ul class="tags"><li>Out-of-distribution detection</li><li>Data efficiency</li><li>Representation analysis</li><li>Data curation</li></ul>
+      <p class="outputs"><strong>Coming soon:</strong> a detailed blog post on what this project has turned up so far.</p>
+    </div>
+    <figure class="viz" data-viz="familiar">
+      <div class="viz-stage">
+        <canvas role="img" aria-label="A cartoon map of how a model sees scans. Gold dots are training scans and mark out a familiar zone. Incoming scans are rings: grey if they land inside the zone, cyan if they land outside it. Adding the cyan ones to training grows the zone."></canvas>
+        <span class="viz-label l" data-role="state">checking 24 scans&hellip;</span>
+        <span class="viz-label r" data-role="count">training set: 44</span>
+      </div>
+      <div class="viz-bar" role="toolbar" aria-label="Incoming scans">
+        <button class="viz-btn" type="button" data-mode="same" aria-pressed="true">Same scanner</button>
+        <button class="viz-btn" type="button" data-mode="new" aria-pressed="false">New scanner</button>
+        <span class="spacer"></span>
+        <button class="viz-btn" type="button" data-action="add">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add new ones</button>
+        <button class="viz-btn" type="button" data-action="reset" aria-label="Reset" title="Reset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 4v6h6"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/></svg></button>
+      </div>
+      <div class="viz-legend"><span><i style="background:#ffcd00"></i>training scans</span><span><i style="background:rgba(255,205,0,.18);border:1.5px solid #ffcd00;border-radius:3px"></i>familiar zone</span><span><i style="background:transparent;border:2px solid #969eac"></i>looks familiar</span><span><i style="background:rgba(120,205,220,.18);border:2px solid #78cddc"></i>looks new</span></div>
+      <figcaption class="viz-cap"><b>Familiar or new?</b> Each dot is a scan, placed by how a model sees it. Incoming scans that land inside the zone the training data already covers teach the model little; the ones outside are where it still has something to learn. Add them and the zone grows, so the next batch holds fewer surprises. Procedurally generated illustration, not real model features.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============================ Project 05 ============================ -->
+  <section class="project" id="airway">
+    <div class="project-text">
+      <p class="eyebrow">Project 05 &middot; Ongoing</p>
       <h2>Airways in fibrotic lungs</h2>
       <p class="q">Segmenting the airway tree where disease makes it hardest to see.</p>
       <p>Airway segmentation underpins the assessment of COPD, fibrosis and lung cancer, and guides navigation bronchoscopy, yet tracing an airway tree by hand can take around 15 hours per scan. In fibrotic lung disease it gets harder, and even expert labels miss fine branches..</p>
@@ -181,38 +213,6 @@
       </div>
       <div class="viz-legend"><span><i style="background:#ffcd00"></i>airway tree</span><span><i style="background:#78cddc"></i>honeycomb cysts</span><span><i style="background:#ff6252"></i>false &ldquo;airway&rdquo; (leakage)</span></div>
       <figcaption class="viz-cap"><b>Why fibrotic lungs are hard.</b> Cysts clustered under the pleura mimic airway lumens, so a naive model grows false branches into them. Synthetic 3D tree, not patient data.</figcaption>
-    </figure>
-  </section>
-
-  <!-- ============================ Project 05 ============================ -->
-  <section class="project" id="side-quest">
-    <div class="project-text">
-      <p class="eyebrow">Project 05 &middot; Out-of-distribution(OOD) Detector &middot; Ongoing</p>
-      <h2>Which data does a model actually need?</h2>
-      <p class="q">Before adding another scan to the pile, ask the model whether that scan is new to it.</p>
-      <p>This one began as a side quest, the small experiments I run purely to build intuition, and grew into a question I now care a lot about. Deep learning is famously data-hungry, and the usual fix for a weak model is more data. I&rsquo;m asking which data actually matters: can a trained network tell us, from its own internal signals, whether an input is familiar to it or genuinely new?</p>
-      <p>The same signals let me check something accuracy alone cannot: when a model scores well on a new kind of scan, does it really see that scan the way it sees its training data? Next, I&rsquo;m turning this into a way to choose data, growing the training set of my <a href="#foundation">lung foundation model</a> with the scans the model finds new rather than more of the same.</p>
-      <div class="why"><b>Why it matters</b>Choosing data by what a model still has to learn, instead of by sheer volume, could make training far more sample-efficient and cut the cost of collecting and labeling medical scans. The same signals can also warn when a deployed model meets data it does not really understand.</div>
-      <ul class="tags"><li>Out-of-distribution detection</li><li>Data efficiency</li><li>Representation analysis</li><li>Data curation</li></ul>
-      <p class="outputs"><strong>Coming soon:</strong> a detailed blog post on what this side quest has turned up so far.</p>
-    </div>
-    <figure class="viz" data-viz="familiar">
-      <div class="viz-stage">
-        <canvas role="img" aria-label="A cartoon map of how a model sees scans. Gold dots are training scans and mark out a familiar zone. Incoming scans are rings: grey if they land inside the zone, cyan if they land outside it. Adding the cyan ones to training grows the zone."></canvas>
-        <span class="viz-label l" data-role="state">checking 24 scans&hellip;</span>
-        <span class="viz-label r" data-role="count">training set: 44</span>
-      </div>
-      <div class="viz-bar" role="toolbar" aria-label="Incoming scans">
-        <button class="viz-btn" type="button" data-mode="same" aria-pressed="true">Same scanner</button>
-        <button class="viz-btn" type="button" data-mode="new" aria-pressed="false">New scanner</button>
-        <span class="spacer"></span>
-        <button class="viz-btn" type="button" data-action="add">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add the new ones</button>
-        <button class="viz-btn" type="button" data-action="reset">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 4v6h6"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/></svg>Reset</button>
-      </div>
-      <div class="viz-legend"><span><i style="background:#ffcd00"></i>training scans</span><span><i style="background:rgba(255,205,0,.18);border:1.5px solid #ffcd00;border-radius:3px"></i>familiar zone</span><span><i style="background:transparent;border:2px solid #969eac"></i>looks familiar</span><span><i style="background:rgba(120,205,220,.18);border:2px solid #78cddc"></i>looks new</span></div>
-      <figcaption class="viz-cap"><b>Familiar or new?</b> Each dot is a scan, placed by how a model sees it. Incoming scans that land inside the zone the training data already covers teach the model little; the ones outside are where it still has something to learn. Add them and the zone grows, so the next batch holds fewer surprises. Procedurally generated illustration, not real model features.</figcaption>
     </figure>
   </section>
 

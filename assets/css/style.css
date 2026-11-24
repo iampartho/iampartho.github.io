@@ -256,8 +256,10 @@ a:hover { background-color: var(--gold-soft); }
 }
 .chips li::before { content: "◆"; color: var(--gold); font-size: 9px; margin-right: 8px; vertical-align: 2px; }
 
-/* Now-working-on cards */
-.now-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+/* Now-working-on cards: 3 on the first row (the thesis bridges), 2 wider ones below (parallel threads) */
+.now-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+.now-grid > .now-card { grid-column: span 2; }
+.now-grid > .now-card:nth-child(n+4) { grid-column: span 3; }
 .now-card {
   display: flex; flex-direction: column; gap: 8px; padding: 18px; text-decoration: none;
   border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface);
@@ -272,7 +274,10 @@ a:hover { background-color: var(--gold-soft); }
 .now-card h3 { margin: 4px 0 0; font: 600 15.5px/1.35 var(--sans); }
 .now-card p { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
 .now-card .go { margin-top: auto; padding-top: 6px; font: 500 12px/1 var(--mono); color: var(--gold-ink); }
-@media (max-width: 900px) { .now-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) {
+  .now-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .now-grid > .now-card, .now-grid > .now-card:nth-child(n+4) { grid-column: auto; }
+}
 @media (max-width: 520px) { .now-grid { grid-template-columns: minmax(0, 1fr); } }
 
 /* News */
