@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Projects · Partho Ghosh</title>
-  <meta name="description" content="Ongoing research by Partho Ghosh: lung segmentation that transfers from CT to UTE MRI, anatomy-preserving MRI-to-CT synthesis, a lung foundation model, airway segmentation in fibrotic lungs, and a side quest on which training data a model actually needs.">
+  <meta name="description" content="Ongoing research by Partho Ghosh: lung segmentation that transfers from CT to UTE MRI, anatomy-preserving MRI-to-CT synthesis, a lung foundation model, airway segmentation in fibrotic lungs, and a Out-of-distribution detector on which training data a model actually needs.">
   <link rel="canonical" href="https://iampartho.github.io/projects.html">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Projects · Partho Ghosh">
@@ -50,7 +50,7 @@
   <section class="page-head">
     <p class="eyebrow">Research &middot; ongoing work</p>
     <h1>Projects</h1>
-    <p class="lede">Thousands of annotated CT scans exist, but labeled UTE MRI scans are rare. My Ph.D. builds three bridges across that gap, plus two parallel threads: airway segmentation in diseased lungs, and a side quest on which training data a model actually needs. These projects are still in progress, so this page covers the <em>what</em> and the <em>why</em>. The <em>how</em> will follow in the papers.</p>
+    <p class="lede">Thousands of annotated CT scans exist, but labeled UTE MRI scans are rare. My Ph.D. builds three bridges across that gap, plus two parallel threads: airway segmentation in diseased lungs, and a out-of-distribution detector on which training data a model actually needs. These projects are still in progress, so this page covers the <em>what</em> and the <em>why</em>. The <em>how</em> will follow in the papers.</p>
   </section>
 
   <div class="bridge" role="group" aria-label="Thesis overview: three routes from CT to UTE MRI">
@@ -70,7 +70,7 @@
       <span>Radiation-free and repeatable, ideal for children and follow-ups, but labels are scarce.</span>
     </div>
   </div>
-  <p class="side-thread"><span>Parallel threads:</span> <a href="#airway">04 &middot; Airway segmentation in fibrotic lungs</a> <a href="#side-quest">05 &middot; Side quest: which data does a model need?</a></p>
+  <p class="side-thread"><span>Parallel threads:</span> <a href="#airway">04 &middot; Airway segmentation in fibrotic lungs</a> <a href="#side-quest">05 &middot; OOD Detector: which data does a model need?</a></p>
 
   <!-- ============================ Project 01 ============================ -->
   <section class="project" id="cross-modal">
@@ -187,7 +187,7 @@
   <!-- ============================ Project 05 ============================ -->
   <section class="project" id="side-quest">
     <div class="project-text">
-      <p class="eyebrow">Project 05 &middot; Side quest &middot; Ongoing</p>
+      <p class="eyebrow">Project 05 &middot; Out-of-distribution(OOD) Detector &middot; Ongoing</p>
       <h2>Which data does a model actually need?</h2>
       <p class="q">Before adding another scan to the pile, ask the model whether that scan is new to it.</p>
       <p>This one began as a side quest, the small experiments I run purely to build intuition, and grew into a question I now care a lot about. Deep learning is famously data-hungry, and the usual fix for a weak model is more data. I&rsquo;m asking which data actually matters: can a trained network tell us, from its own internal signals, whether an input is familiar to it or genuinely new?</p>
